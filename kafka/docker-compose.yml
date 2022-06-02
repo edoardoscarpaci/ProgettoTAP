@@ -1,0 +1,67 @@
+version: '3.7'
+services: 
+    zookeeper:
+        build: .
+        image: progetto:kafka
+        container_name: kafkaZK
+        ports:
+            - "2181:2181"
+        environment:
+            - KAFKA_ACTION=start-zk
+        networks: 
+            progetto:
+                ipv4_address: 10.0.100.22
+    zkui:
+        image: juris/zkui
+        container_name: zkui
+        environment:
+            - ZK_SERVER=10.0.100.22:2181
+        ports:
+            - 9090:9090
+        networks: 
+            - progetto
+        depends_on:
+            - zookeeper
+    kafkaserver:
+        build: .
+        image: progetto:kafka
+        container_name: kafkaServer
+        environment:
+            - KAFKA_ACTION=start-kafka
+        ports:
+            - 9092:9092
+        networks: 
+            progetto:
+                ipv4_address: 10.0.100.23
+        depends_on:
+            - zookeeper
+    webui:
+        image: provectuslabs/kafka-ui:latest
+        container_name: kafkaWebUI
+        environment:
+            - KAFKA_CLUSTERS_0_NAME=local
+            - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=10.0.100.23:9092
+        ports: 
+            - 8080:8080
+        networks: 
+            - progetto
+        depends_on:
+            - kafkaserver
+    webui2:
+        image: obsidiandynamics/kafdrop
+        container_name: kafkaWebUI_2
+        environment:
+            - KAFKA_BROKERCONNECT=10.0.100.23:9092
+        ports: 
+            - 9000:9000
+        networks: 
+            - progetto
+        depends_on:
+            - kafkaserver
+networks:
+    progetto:
+        name: progetto
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.0.100.1/24
