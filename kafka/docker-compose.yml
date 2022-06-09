@@ -35,6 +35,56 @@ services:
                 ipv4_address: 10.0.100.23
         depends_on:
             - zookeeper
+    kafkaConnect:
+        build: .
+        image: progetto:kafka
+        container_name: kafkaConnectElastic
+        environment:
+            - KAFKA_ACTION=kafka-connect-elastic
+        networks: 
+            - progetto
+        depends_on:
+            - kafkatopicRecipeCleaned
+            
+    kafkatopicRecipe:
+        build: .
+        image: progetto:kafka
+        depends_on:
+            - kafkaserver
+        environment: 
+            - KAFKA_ACTION=create-topic
+            - KAFKA_SERVER=10.0.100.23
+            - KAFKA_TOPIC=Recipes
+        networks:
+            progetto:
+                ipv4_address: 10.0.100.24
+
+    kafkatopicRecipeCleaned:
+        build: .
+        image: progetto:kafka
+        depends_on:
+            - kafkatopicRecipe
+        environment: 
+            - KAFKA_ACTION=create-topic
+            - KAFKA_SERVER=10.0.100.23
+            - KAFKA_TOPIC=CleanedRecipes
+        networks:
+            progetto:
+                ipv4_address: 10.0.100.25
+      schemaRegistry:
+        image: confluentinc/cp-schema-registry:latest
+        depends_on:
+            - kafkaServer
+        environment: 
+            - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=http://10.0.100.22:2181 
+            - SCHEMA_REGISTRY_HOST_NAME=http://10.0.100.22 
+            - SCHEMA_REGISTRY_LISTENERS=http://10.0.100.26:8081 
+            - SCHEMA_REGISTRY_DEBUG=true
+        networks:
+            progetto:
+                ipv4_address: 10.0.100.26
+
+
     webui:
         image: provectuslabs/kafka-ui:latest
         container_name: kafkaWebUI

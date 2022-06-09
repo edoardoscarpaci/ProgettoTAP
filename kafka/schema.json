@@ -1,0 +1,44 @@
+{
+  "type": "record",
+  "name": "Ricetta",
+  "fields": [
+	
+	{
+      	"name": "Nome",
+    	"type": "string"
+    },
+	{
+		"name":"Link",
+    	"type": "string"
+	},
+	{
+		"name":"Steps",
+    	"type": "string"
+	},
+	{
+		"name":"Ingredienti",
+		"type": {
+			"type": "array",
+			"items": {
+				"name": "Ingrediente",
+			  	"type": "record",
+				"fields":[
+					{
+						"name": "Nome",
+					  	"type": "string"
+				 	},
+				  	{
+					  	"name":"Peso",
+					  	"type": "string"
+				  	},
+				  	{
+					  	"name":"Note",
+					  	"type": "string"
+				 	}
+				]
+			}
+		}
+	}
+
+  ]
+}

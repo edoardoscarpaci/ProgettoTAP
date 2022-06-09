@@ -19,26 +19,11 @@ kafka-server-start.sh config/server.properties
 ;;
 "create-topic")
 cd ${KAFKA_DIR}
-kafka-topics.sh --create --bootstrap-server 10.0.100.23:9092 --replication-factor 1 --partitions 1 --topic ${KAFKA_TOPIC}
+kafka-topics.sh --create --bootstrap-server ${KAFKA_SERVER}:9092 -config max.message.bytes=10000121 --replication-factor 1 --partitions 1 --topic ${KAFKA_TOPIC}
 ;;
-"producer")
+"kafka-connect-elastic")
 cd ${KAFKA_DIR}
-#bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test
-kafka-console-producer.sh --broker-list 10.0.100.23:9092 --topic ${KAFKA_TOPIC}
-;;
-"consumer")
-cd ${KAFKA_DIR}
-kafka-console-consumer.sh --bootstrap-server 10.0.100.23:9092 --topic ${KAFKA_TOPIC} --from-beginning ${KAFKA_CONSUMER_PROPERTIES}
-;;
-"connect-standalone")
-cd ${KAFKA_DIR}
-#connect-standalone-twitter.properties mysqlSinkTwitter.conf
-touch /tmp/my-test.txt
-bin/connect-standalone.sh config/${KAFKA_WORKER_PROPERTIES} config/${KAFKA_CONNECTOR_PROPERTIES}  
-;;
-"run-class")
-cd ${KAFKA_DIR}
-bin/kafka-run-class.sh ${KAFKA_CLASS} --bootstrap-server 10.0.100.23:9092 --zookeeper 10.0.100.22:2181 --broker-list 10.0.100.23:9092 
+bin/connect-standalone.sh config/connect-standalone.properties config/elastic-search.properties
 ;;
 esac
 
