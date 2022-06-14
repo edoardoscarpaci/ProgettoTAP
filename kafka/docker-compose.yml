@@ -8,6 +8,10 @@ services:
             - "2181:2181"
         environment:
             - KAFKA_ACTION=start-zk
+        deploy:
+          resources:
+            limits:
+              memory: 512M
         networks: 
             progetto:
                 ipv4_address: 10.0.100.22
@@ -20,8 +24,14 @@ services:
             - 9090:9090
         networks: 
             - progetto
+        deploy:
+          resources:
+            limits:
+              memory: 256M
+        
         depends_on:
             - zookeeper
+        
     kafkaserver:
         build: .
         image: progetto:kafka
@@ -30,11 +40,17 @@ services:
             - KAFKA_ACTION=start-kafka
         ports:
             - 9092:9092
+        deploy:
+          resources:
+            limits:
+              memory: 1024M
+        
         networks: 
             progetto:
                 ipv4_address: 10.0.100.23
         depends_on:
             - zookeeper
+
     kafkaConnect:
         build: .
         image: progetto:kafka
@@ -43,6 +59,11 @@ services:
             - KAFKA_ACTION=kafka-connect-elastic
         networks: 
             - progetto
+        deploy:
+          resources:
+            limits:
+              memory: 256M
+        
         depends_on:
             - kafkatopicRecipeCleaned
             
@@ -55,6 +76,10 @@ services:
             - KAFKA_ACTION=create-topic
             - KAFKA_SERVER=10.0.100.23
             - KAFKA_TOPIC=Recipes
+        deploy:
+          resources:
+            limits:
+              memory: 128M
         networks:
             progetto:
                 ipv4_address: 10.0.100.24
@@ -68,23 +93,13 @@ services:
             - KAFKA_ACTION=create-topic
             - KAFKA_SERVER=10.0.100.23
             - KAFKA_TOPIC=CleanedRecipes
+        deploy:
+          resources:
+            limits:
+              memory: 128M
         networks:
             progetto:
-                ipv4_address: 10.0.100.25
-      schemaRegistry:
-        image: confluentinc/cp-schema-registry:latest
-        depends_on:
-            - kafkaServer
-        environment: 
-            - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=http://10.0.100.22:2181 
-            - SCHEMA_REGISTRY_HOST_NAME=http://10.0.100.22 
-            - SCHEMA_REGISTRY_LISTENERS=http://10.0.100.26:8081 
-            - SCHEMA_REGISTRY_DEBUG=true
-        networks:
-            progetto:
-                ipv4_address: 10.0.100.26
-
-
+                ipv4_address: 10.0.100.25  
     webui:
         image: provectuslabs/kafka-ui:latest
         container_name: kafkaWebUI
@@ -97,17 +112,10 @@ services:
             - progetto
         depends_on:
             - kafkaserver
-    webui2:
-        image: obsidiandynamics/kafdrop
-        container_name: kafkaWebUI_2
-        environment:
-            - KAFKA_BROKERCONNECT=10.0.100.23:9092
-        ports: 
-            - 9000:9000
-        networks: 
-            - progetto
-        depends_on:
-            - kafkaserver
+        deploy:
+          resources:
+            limits:
+              memory: 512M
 networks:
     progetto:
         name: progetto

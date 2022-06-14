@@ -1,0 +1,3 @@
+#!/bin/bash
+
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{ "schema" : "{ \"name\": \"Ricetta\", \"type\": \"record\", \"fields\": [ { \"name\": \"Nome\", \"type\": \"string\" }, { \"name\":\"Link\", \"type\": \"string\" }, { \"name\":\"Steps\", \"type\": \"string\" }, { \"name\":\"Ingredienti\", \"type\": { \"type\": \"array\", \"items\": { \"name\": \"Ingrediente\", \"type\": \"record\", \"fields\":[ { \"name\": \"Nome\", \"type\": \"string\" }, { \"name\":\"Peso\", \"type\": \"string\" }, { \"name\":\"Note\", \"type\": \"string\" } ] } } } ] }" }' http://10.0.100.26:8081/subjects/CleanedRecipes/versions
