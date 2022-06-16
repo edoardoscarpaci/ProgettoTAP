@@ -12,7 +12,8 @@ echo "Running example ARGS $@"
 ./bin/spark-shell --master local[2]
 ;;
 "pyspark")
-./bin/pyspark --master local[2]	
+./bin/pyspark --master local[2]
+jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
 ;;
 "spark-submit-python")
  ./bin/spark-submit --packages $2 /opt/tap/$1
