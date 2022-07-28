@@ -1,0 +1,194 @@
+version: '3.7'
+services: 
+    zookeeper:
+        build: ./kafka/
+        image: progetto:kafka
+        
+        ports:
+            - "2181:2181"
+        environment:
+            - KAFKA_ACTION=start-zk
+        networks: 
+            progetto:
+                ipv4_address: 10.0.100.22
+    zkui:
+        image: juris/zkui
+        
+        environment:
+            - ZK_SERVER=10.0.100.22:2181
+        ports:
+            - 9090:9090
+        networks: 
+            - progetto
+        
+        depends_on:
+            - zookeeper
+        
+    kafkaServer:
+        build: ./kafka/
+        image: progetto:kafka
+        
+        environment:
+            - KAFKA_ACTION=start-kafka
+        ports:
+            - 9092:9092        
+        networks: 
+            progetto:
+                ipv4_address: 10.0.100.23
+        depends_on:
+            - zookeeper
+
+    kafkaConnect:
+        build: ./kafka/
+        image: progetto:kafka
+        restart: unless-stopped
+        environment:
+            - KAFKA_ACTION=kafka-connect-elastic
+        networks: 
+            - progetto        
+        depends_on:
+            - kibana
+            - kafkaServer
+            - elastic-search
+            - kafkaStreamer
+            - kafkaTopicRecipeCleaned
+            
+    kafkaTopicRecipe:
+        build: ./kafka/
+        
+        image: progetto:kafka
+        depends_on:
+            - kafkaServer
+        environment: 
+            - KAFKA_ACTION=create-topic
+            - KAFKA_SERVER=10.0.100.23
+            - KAFKA_TOPIC=Recipes
+        networks:
+            - progetto
+
+    kafkaTopicRecipeCleaned:
+        build: ./kafka/
+        image: progetto:kafka
+        
+        depends_on:
+            - kafkaTopicRecipe
+        environment: 
+            - KAFKA_ACTION=create-topic
+            - KAFKA_SERVER=10.0.100.23
+            - KAFKA_TOPIC=CleanedRecipes
+        networks:
+            - progetto
+
+    kafkaTopicIngredients:
+      build: ./kafka/
+      image: progetto:kafka
+      depends_on:
+          - kafkaServer
+      environment: 
+          - KAFKA_ACTION=create-topic
+          - KAFKA_SERVER=10.0.100.23
+          - KAFKA_TOPIC=Ingredients
+      networks: 
+          - progetto
+
+    webui:
+        image: provectuslabs/kafka-ui:latest
+        
+        environment:
+            - KAFKA_CLUSTERS_0_NAME=local
+            - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=10.0.100.23:9092
+        ports: 
+            - 8080:8080
+        networks: 
+            - progetto
+        depends_on:
+            - kafkaServer
+    
+    kafkaStreamer:
+        build: ./kafkaStream/
+        image: progetto:kafkaStreamer
+        
+        environment:
+            - STREAMER_ACTION=streamer        
+        networks: 
+            - progetto
+        depends_on:
+            - kafkaTopicRecipeCleaned
+    
+    kafkaLister:
+        build: ./kafkaStream/
+        image: progetto:kafkaStreamer
+        
+        environment:
+            - STREAMER_ACTION=lister        
+        networks: 
+            - progetto
+        depends_on:
+            - kafkaTopicIngredients
+            - kafkaTopicRecipeCleaned
+
+    fluent:
+        build: ./fluent/
+        image: progetto:fluent
+        restart: unless-stopped
+        networks: 
+            - progetto
+        depends_on:
+          - kafkaTopicRecipe
+
+
+    sparkSteps:
+        build: ./spark/
+        image: progetto:spark
+        
+        volumes:
+            - ./spark/apps:/apps
+            - ./spark/logs:/logs
+        ports:
+            - "7077:7077"
+            - "9999:9999"
+        environment:
+            - SPARK_ACTION=spark-submit-python
+            - SPARK_LOG_DIR=/logs
+            - SPARK_MASTER_HOST=10.0.100.80
+            - SPARK_MASTER_PORT=7077
+            - SPARK_MASTER_WEBUI_PORT=9999
+            - APP_NAME=w2vsteps.py
+        depends_on:
+          - kibana
+          - kafkaStreamer
+        networks: 
+            progetto:
+                ipv4_address: 10.0.100.80
+    
+    elastic-search:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
+        ports:
+            - "9200:9200"
+            - "9300:9300"
+        environment:
+            - ES_JAVA_OPTS=-Xms2g -Xmx2g
+            - XPACK_SECURITY_ENABLED=false
+            - xpack.security.enabled=false
+            - discovery.type=single-node
+        networks: 
+            progetto:
+                ipv4_address: 10.0.100.51
+    kibana:
+        build: ./kibana/
+        image: progetto:kibana
+        
+        ports:
+            - 5601:5601
+        networks: 
+            progetto:
+                ipv4_address: 10.0.100.52
+        depends_on:
+            - elastic-search
+networks:
+    progetto:
+        name: progetto
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.0.100.1/24

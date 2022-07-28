@@ -4,9 +4,15 @@
 
 echo "Running action ${SPARK_ACTION}"
 case ${SPARK_ACTION} in
-"example")
-echo "Running example ARGS $@"
-./bin/run-example $@
+"spark-master")
+./sbin/start-master.sh
+tail -f /dev/null
+
+;;
+"spark-worker")
+./sbin/start-slave.sh --webui-port ${SPARK_WORKER_WEBUI_PORT} spark://${SPARK_MASTER_HOST}:${SPARK_MASTER_PORT} 
+tail -f /dev/null
+
 ;;
 "spark-shell")
 ./bin/spark-shell --master local[2]
@@ -16,7 +22,7 @@ echo "Running example ARGS $@"
 jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
 ;;
 "spark-submit-python")
- ./bin/spark-submit --packages $2 /opt/tap/$1
+./bin/spark-submit /apps/${APP_NAME} 
 ;;
 "spark-submit-apps")
 echo "Running spark-submin --class $1 /opt/tap/apps/$2"
@@ -37,3 +43,4 @@ do
 done
 ;;
 esac
+

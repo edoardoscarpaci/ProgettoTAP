@@ -19,7 +19,7 @@ kafka-server-start.sh config/server.properties
 ;;
 "create-topic")
 cd ${KAFKA_DIR}
-kafka-topics.sh --create --bootstrap-server ${KAFKA_SERVER}:9092 -config max.message.bytes=10000121 --replication-factor 1 --partitions 1 --topic ${KAFKA_TOPIC}
+kafka-topics.sh --create --bootstrap-server ${KAFKA_SERVER}:9092 -config max.message.bytes=100001210 --replication-factor 1 --partitions 1 --topic ${KAFKA_TOPIC}
 ;;
 "kafka-connect-elastic")
 cd ${KAFKA_DIR}

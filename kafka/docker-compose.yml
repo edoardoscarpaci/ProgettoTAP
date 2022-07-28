@@ -23,12 +23,7 @@ services:
         ports:
             - 9090:9090
         networks: 
-            - progetto
-        deploy:
-          resources:
-            limits:
-              memory: 256M
-        
+            - progetto        
         depends_on:
             - zookeeper
         
@@ -101,21 +96,21 @@ services:
             progetto:
                 ipv4_address: 10.0.100.25
 
-      kafkatopicIngredients:
-        build: .
-        image: progetto:kafka
-        depends_on:
-            - kafkatopicRecipe
-        environment: 
-            - KAFKA_ACTION=create-topic
-            - KAFKA_SERVER=10.0.100.23
-            - KAFKA_TOPIC=Ingredients
-        deploy:
-          resources:
-            limits:
-              memory: 128M
-        networks: 
-            - progetto        
+    kafkatopicIngredients:
+      build: .
+      image: progetto:kafka
+      depends_on:
+          - kafkatopicRecipe
+      environment: 
+          - KAFKA_ACTION=create-topic
+          - KAFKA_SERVER=10.0.100.23
+          - KAFKA_TOPIC=Ingredients
+      deploy:
+        resources:
+          limits:
+            memory: 128M
+      networks: 
+          - progetto        
     webui:
         image: provectuslabs/kafka-ui:latest
         container_name: kafkaWebUI

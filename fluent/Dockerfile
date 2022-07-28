@@ -4,6 +4,7 @@ USER root
 RUN apt-get update && apt-get -y install build-essential 
 RUN gem install fluent-plugin-kafka --no-document
 ADD fluent.conf /opt/fluent.conf
+ADD fluent.conf /fluentd/etc/
 ADD recipe.json /opt/recipe.json
 
 # to build with
