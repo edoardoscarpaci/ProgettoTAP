@@ -7,10 +7,10 @@
 
 
 #Esecuzioni successive
-1)assicurarsi che i container sono spenti (si puo usare il comando docker-compose down per spegnerli tutti)
-2)eseguire il comando docker-compose up 
+1) assicurarsi che i container sono spenti (si puo usare il comando docker-compose down per spegnerli tutti)
+2) eseguire il comando docker-compose up 
 
 
 #Web UI
--Kafka WEB UI localhost:8080
--Kibana localhost:5601
+- Kafka WEB UI localhost:8080
+- Kibana localhost:5601
