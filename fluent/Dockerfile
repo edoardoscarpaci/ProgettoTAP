@@ -7,6 +7,8 @@ ADD fluent.conf /opt/fluent.conf
 ADD fluent.conf /fluentd/etc/
 ADD recipe.json /opt/recipe.json
 
+RUN sleep 2
+
 # to build with
 # docker build . --tag progetto:fluent
 # and run with 
