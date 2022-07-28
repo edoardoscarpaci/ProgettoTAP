@@ -12,5 +12,5 @@
 
 
 #Web UI
-- Kafka WEB UI localhost:8080
-- Kibana localhost:5601
+- Kafka WebUI: localhost:8080
+- Kibana WebUI:  localhost:5601
